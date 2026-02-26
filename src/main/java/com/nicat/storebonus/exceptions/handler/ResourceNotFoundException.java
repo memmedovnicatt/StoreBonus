@@ -1,4 +1,4 @@
-package com.nicat.storebonus.exceptions;
+package com.nicat.storebonus.exceptions.handler;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {
