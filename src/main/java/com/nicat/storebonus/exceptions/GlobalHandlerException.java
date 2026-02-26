@@ -15,13 +15,19 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalHandlerException {
 
-    //for custom exceptions
-//    @ExceptionHandler(ResourceNotFoundException.class)
-//    public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
-//        return ResponseEntity
-//                .status(HttpStatus.NOT_FOUND)
-//                .body(ApiResponse.error(ResponseMessage.NOT_FOUND)); // Burada həm mesaj, həm də kod (məs: 4004) gedir
-//    }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .message(ex.getMessage())
+                .code(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
 
 
     //for manage validation errors
