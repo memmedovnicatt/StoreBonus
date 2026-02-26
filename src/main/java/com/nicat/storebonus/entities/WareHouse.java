@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,24 +19,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "ware_houses")
 @EntityListeners(AuditingEntityListener.class)
-public class WareHouse {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+public class WareHouse extends BaseEntity {
 
     String name;
     String location;
-
-    @CreatedDate
-    LocalDateTime createdAt;
-
-    @LastModifiedDate
-    LocalDateTime updatedAt;
-
     LocalDateTime deletedAt;
-
-    boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
