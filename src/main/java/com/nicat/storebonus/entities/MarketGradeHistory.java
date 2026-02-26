@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "employers")
+@Table(name = "market_grades_histories")
 public class MarketGradeHistory extends BaseEntity {
 
     LocalDate startDate;
