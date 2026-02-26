@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,8 +22,8 @@ import java.time.LocalDateTime;
 public class Grade extends BaseEntity {
 
     String type;
+
     LocalDateTime deletedAt;
-    boolean isActive;
 
     //warehouse_id
     @ManyToOne
