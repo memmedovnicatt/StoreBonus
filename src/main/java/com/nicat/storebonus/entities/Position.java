@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,21 +19,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "positions")
 @EntityListeners(AuditingEntityListener.class)
-public class Position {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
-
+public class Position extends BaseEntity {
     String name;
-
-    @CreatedDate
-    LocalDateTime createdAt;
-
-    @LastModifiedDate
-    LocalDateTime updatedAt;
-
     LocalDateTime deletedAt;
-    boolean isActive;
-
 }
