@@ -4,6 +4,7 @@ import com.nicat.storebonus.dtos.request.CompanyRequest;
 import com.nicat.storebonus.dtos.response.ApiResponse;
 import com.nicat.storebonus.dtos.response.ResponseMessage;
 import com.nicat.storebonus.entities.Company;
+import com.nicat.storebonus.exceptions.ResourceNotFoundException;
 import com.nicat.storebonus.repositories.CompanyRepository;
 import com.nicat.storebonus.services.CompanyService;
 import lombok.AccessLevel;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -38,5 +40,14 @@ public class CompanyServiceImpl implements CompanyService {
                 .success(true)
                 .timestamp(LocalDateTime.now())
                 .build();
+    }
+
+    @Override
+    public Company checkCompanyExists(Long companyId) {
+        Company company = companyRepository.findById(companyId).orElse(null);
+        if (company == null) {
+            throw new ResourceNotFoundException("Company", companyId);
+        }
+        return company;
     }
 }
