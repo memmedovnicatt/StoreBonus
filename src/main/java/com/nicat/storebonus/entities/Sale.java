@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,20 +21,10 @@ import java.util.Date;
 @Entity
 @Table(name = "sales")
 @EntityListeners(AuditingEntityListener.class)
-public class Sale {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+public class Sale extends BaseEntity {
 
     String name;
     String location;
-
-    @CreatedDate
-    LocalDateTime createdAt;
-
-    @LastModifiedDate
-    LocalDateTime updatedAt;
 
     //employer_id
     @ManyToOne
