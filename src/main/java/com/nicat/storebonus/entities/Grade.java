@@ -1,0 +1,31 @@
+package com.nicat.storebonus.entities;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "grades")
+@EntityListeners(AuditingEntityListener.class)
+public class Grade extends BaseEntity {
+
+    String type;
+    LocalDateTime deletedAt;
+    boolean isActive;
+
+    //warehouse_id
+    @ManyToOne
+    @JoinColumn(name = "ware_house_id")
+    WareHouse wareHouse;
+}
