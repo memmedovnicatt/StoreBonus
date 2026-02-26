@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.yaml.snakeyaml.error.Mark;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,4 +35,7 @@ public class EmployerSalary extends BaseEntity {
     Employer employer;
 
     //market_id
+    @ManyToOne
+    @JoinColumn(name = "market_id")
+    Market market;
 }
