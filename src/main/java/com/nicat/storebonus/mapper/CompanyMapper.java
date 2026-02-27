@@ -6,5 +6,5 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public class CompanyMapper {
+public interface CompanyMapper {
 }
