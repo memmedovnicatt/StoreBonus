@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "positions")
-@EntityListeners(AuditingEntityListener.class)
 public class Position extends BaseEntity {
     String name;
     LocalDateTime deletedAt;

@@ -20,7 +20,6 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "employer_salaries")
-@EntityListeners(AuditingEntityListener.class)
 public class EmployerSalary extends BaseEntity {
     Date validFrom;
 

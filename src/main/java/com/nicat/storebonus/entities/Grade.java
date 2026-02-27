@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "grades")
-@EntityListeners(AuditingEntityListener.class)
 public class Grade extends BaseEntity {
 
     String type;

@@ -14,7 +14,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "market_employers_histories")
-@EntityListeners(AuditingEntityListener.class)
 public class MarketEmployersHistory extends BaseEntity {
 
     @ManyToOne()

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "employers")
-@EntityListeners(AuditingEntityListener.class)
 public class Employer extends BaseEntity {
     String name;
     String surname;

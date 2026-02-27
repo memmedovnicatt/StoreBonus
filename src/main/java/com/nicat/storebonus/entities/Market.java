@@ -20,7 +20,6 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "markets")
-@EntityListeners(AuditingEntityListener.class)
 public class Market extends BaseEntity {
 
     String name;
