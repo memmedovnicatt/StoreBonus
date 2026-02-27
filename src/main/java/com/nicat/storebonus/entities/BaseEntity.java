@@ -28,4 +28,11 @@ public abstract class BaseEntity {
     @LastModifiedDate
     LocalDateTime updatedAt;
     boolean isActive;
+
+    @PrePersist
+    protected void onCreate() {
+        if (!isActive) {
+            isActive = true;
+        }
+    }
 }
