@@ -6,6 +6,7 @@ import com.nicat.storebonus.dtos.response.PositionResponse;
 import com.nicat.storebonus.dtos.response.ResponseMessage;
 import com.nicat.storebonus.entities.Position;
 import com.nicat.storebonus.exceptions.handler.ResourceAlreadyExistsException;
+import com.nicat.storebonus.exceptions.handler.ResourceNotFoundException;
 import com.nicat.storebonus.mapper.PositionMapper;
 import com.nicat.storebonus.repositories.PositionRepository;
 import com.nicat.storebonus.services.PositionService;
@@ -40,13 +41,6 @@ public class PositionServiceImpl implements PositionService {
                 .build();
 
         positionRepository.save(position);
-
-        ApiResponse.<Void>builder()
-                .data(null)
-                .message(ResponseMessage.SUCCESS_CREATE.getMessage())
-                .success(true)
-                .timestamp(LocalDateTime.now())
-                .build();
     }
 
     @Override
@@ -55,5 +49,9 @@ public class PositionServiceImpl implements PositionService {
         return positionMapper.toListPositionResponse(positions);
     }
 
-
+    @Override
+    public Position checkExistsPosition(Long positionId) {
+        return positionRepository.findById(positionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Position", "id", positionId));
+    }
 }

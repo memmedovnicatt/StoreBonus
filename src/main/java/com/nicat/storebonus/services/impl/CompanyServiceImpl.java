@@ -45,7 +45,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Company checkCompanyExists(Long companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
         if (company == null) {
-            throw new ResourceNotFoundException("Company", companyId);
+            throw new ResourceNotFoundException("Company", "id", companyId);
         }
         return company;
     }
