@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -16,9 +17,9 @@ import java.util.Date;
 @Entity
 @Table(name = "employer_contracts")
 public class EmployerContract extends BaseEntity {
-    Date validFrom;
+    LocalDate validFrom;
 
-    Date validTo;
+    LocalDate validTo;
 
     BigDecimal baseSalary;
     String currency;
@@ -33,7 +34,7 @@ public class EmployerContract extends BaseEntity {
     @JoinColumn(name = "market_id")
     Market market;
 
-    //market_id
+    //position_id
     @ManyToOne
     @JoinColumn(name = "position_id")
     Position position;

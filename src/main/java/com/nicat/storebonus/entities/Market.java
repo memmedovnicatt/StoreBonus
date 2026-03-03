@@ -31,9 +31,4 @@ public class Market extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "ware_house_id")
     WareHouse wareHouse;
-
-    //grade_id
-    @ManyToOne
-    @JoinColumn(name = "grade_id")
-    Grade grade;
 }

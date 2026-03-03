@@ -2,6 +2,8 @@ package com.nicat.storebonus.entities;
 
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,5 +22,15 @@ public class MarketGradeHistory extends BaseEntity {
 
     LocalDate startDate;
     LocalDate endDate;
-    Long gradeId;
+
+    //grade_id
+    @ManyToOne
+    @JoinColumn(name = "grade_id")
+    Grade grade;
+
+    //market_id
+    @ManyToOne
+    @JoinColumn(name = "market_id")
+    Market market;
+
 }
