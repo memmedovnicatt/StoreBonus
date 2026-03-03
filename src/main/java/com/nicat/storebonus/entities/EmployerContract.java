@@ -19,14 +19,14 @@ import java.util.Date;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "employer_salaries")
+@Table(name = "employer_contracts")
 public class EmployerSalary extends BaseEntity {
     Date validFrom;
 
     Date validTo;
 
     BigDecimal baseSalary;
-    //maybe implemented currency for calculated real time and convert AZN
+    String currency;
 
     //employer_id
     @ManyToOne
@@ -37,4 +37,9 @@ public class EmployerSalary extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "market_id")
     Market market;
+
+    //market_id
+    @ManyToOne
+    @JoinColumn(name = "position_id")
+    Position position;
 }

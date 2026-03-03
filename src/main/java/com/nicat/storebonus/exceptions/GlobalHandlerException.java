@@ -35,10 +35,10 @@ public class GlobalHandlerException {
 
     //for manage all not found exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNotFound() {
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .success(false)
-                .message(ResponseMessage.NOT_FOUND.getMessage())
+                .message(ex.getMessage())
                 .code(ResponseMessage.NOT_FOUND.getCode())
                 .timestamp(LocalDateTime.now())
                 .build();
