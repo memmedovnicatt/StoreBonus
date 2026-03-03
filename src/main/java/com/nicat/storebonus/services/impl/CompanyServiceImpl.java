@@ -32,13 +32,6 @@ public class CompanyServiceImpl implements CompanyService {
                 .build();
 
         companyRepository.save(company);
-
-        ApiResponse.<Void>builder()
-                .data(null)
-                .message(ResponseMessage.SUCCESS_CREATE.getMessage())
-                .success(true)
-                .timestamp(LocalDateTime.now())
-                .build();
     }
 
     @Override

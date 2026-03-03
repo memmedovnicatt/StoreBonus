@@ -36,14 +36,6 @@ public class WareHouseServiceImpl implements WareHouseService {
                 .build();
 
         wareHouseRepository.save(wareHouse);
-
-        ApiResponse.<Void>builder()
-                .data(null)
-                .code(ResponseMessage.SUCCESS_CREATE.getCode())
-                .message(ResponseMessage.SUCCESS_CREATE.getMessage())
-                .success(true)
-                .timestamp(LocalDateTime.now())
-                .build();
     }
 
     @Override

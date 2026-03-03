@@ -51,6 +51,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public Position checkExistsPosition(Long positionId) {
+        log.info("BASLADI");
         return positionRepository.findById(positionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Position", "id", positionId));
     }
