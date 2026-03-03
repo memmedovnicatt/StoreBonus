@@ -3,6 +3,7 @@ package com.nicat.storebonus.services.impl;
 import com.nicat.storebonus.dtos.request.EmployerRequest;
 import com.nicat.storebonus.entities.Employer;
 import com.nicat.storebonus.entities.Position;
+import com.nicat.storebonus.exceptions.handler.ResourceNotFoundException;
 import com.nicat.storebonus.mapper.EmployerMapper;
 import com.nicat.storebonus.repositories.EmployerRepository;
 import com.nicat.storebonus.repositories.PositionRepository;
@@ -32,5 +33,11 @@ public class EmployerServiceImpl implements EmployerService {
         savedEmployer.setPosition(position);
 
         employerRepository.save(savedEmployer);
+    }
+
+    @Override
+    public Employer checkExistsEmployer(Long employerId) {
+        return employerRepository.findById(employerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employer", "id", employerId));
     }
 }
