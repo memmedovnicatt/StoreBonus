@@ -8,6 +8,8 @@ public enum ResponseMessage {
     // Success codes (example, between the 1000-1999)
     SUCCESS_FETCH(1000, "Data fetched successfully"),
     SUCCESS_CREATE(1001, "Data created successfully"),
+    SUCCESS_CALCULATED(1002, "Grade successfully calculated"),
+
 
     // Error codes (example, between the 4004-4999)
     NOT_FOUND(4004, "Resource not found"),
