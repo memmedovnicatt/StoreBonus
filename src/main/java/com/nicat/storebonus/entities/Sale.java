@@ -21,10 +21,6 @@ import java.util.Date;
 @Entity
 @Table(name = "sales")
 public class Sale extends BaseEntity {
-
-    String name;
-    String location;
-
     //employer_id
     @ManyToOne
     @JoinColumn(name = "employer_id")
