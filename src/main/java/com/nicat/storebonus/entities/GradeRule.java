@@ -1,13 +1,11 @@
 package com.nicat.storebonus.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.yaml.snakeyaml.error.Mark;
+
+import java.math.BigDecimal;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,23 +14,23 @@ import org.yaml.snakeyaml.error.Mark;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "grade_position_bonusses")
-public class GradePositionBonus extends BaseEntity {
+@Table(name = "grade_bonus_rules")
+public class GradeBonusRule extends BaseEntity {
     //grade_id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grade_id")
     Grade grade;
 
     //position_id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     Position position;
 
     //market_id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "market_id")
     Market market;
 
     Double bonusPercent;
-    Double amount;
+    BigDecimal amount;
 }
