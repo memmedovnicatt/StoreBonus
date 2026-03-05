@@ -11,13 +11,15 @@ public enum ResponseMessage {
     SUCCESS_CALCULATED(1002, "Grade successfully calculated"),
 
 
-    // Error codes (example, between the 4004-4999)
-    NOT_FOUND(4004, "Resource not found"),
-    ALREADY_EXISTS(4009, "Resource already exists"),
-    INTERNAL_ERROR(5000, "An unexpected system error occurred"),
+    // Error codes (example, between the 2000-3000)
+    NOT_FOUND(2000, "Resource not found"),
+    ALREADY_EXISTS(2001, "Resource already exists"),
+    INTERNAL_ERROR(2002, "An unexpected system error occurred"),
+    TARGET_NOT_REACHED(2003, "Market was not reached to target"),
 
     //Validation error
-    VALIDATION_ERROR(6000,"Validation failed");
+    VALIDATION_ERROR(6000, "Validation failed");
+
 
     private final String message;
     private final int code;
