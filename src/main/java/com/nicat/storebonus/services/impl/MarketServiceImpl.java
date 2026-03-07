@@ -53,6 +53,8 @@ public class MarketServiceImpl implements MarketService {
                 .market(market)
                 .grade(grade)
                 .startDate(LocalDate.now())
+                .minThreshold(marketRequest.minThreshold())
+                .maxThreshold(marketRequest.maxThreshold())
                 .build();
         marketGradeHistoryRepository.save(marketGradeHistory);
     }
