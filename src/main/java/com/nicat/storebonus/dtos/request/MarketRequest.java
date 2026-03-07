@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.math.BigDecimal;
+
 public record MarketRequest(
         @NotBlank(message = "Name can not null")
         String name,
@@ -17,6 +19,9 @@ public record MarketRequest(
 
         @NotNull(message = "GradeId can not null")
         @Positive
-        Long gradeId
+        Long gradeId,
+
+        BigDecimal minThreshold,
+        BigDecimal maxThreshold
 ) {
 }
