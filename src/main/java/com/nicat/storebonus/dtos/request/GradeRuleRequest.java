@@ -6,7 +6,7 @@ public record GradeRuleRequest(
         Long gradeId,
         Long positionId,
         Long marketId,
-        Double bonusPercent,
+        BigDecimal bonusPercent,
         BigDecimal amount
 ) {
 }

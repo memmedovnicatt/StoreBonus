@@ -18,12 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,6 +45,7 @@ public class GradeServiceImpl implements GradeService {
         Grade grade = Grade.builder()
                 .gradeType(gradeRequest.gradeType())
                 .name(gradeRequest.name())
+                .generalPercent(gradeRequest.generalPercent())
                 .build();
         gradeRepository.save(grade);
     }
@@ -70,71 +69,69 @@ public class GradeServiceImpl implements GradeService {
         if (optional.isPresent()) {
             MarketGradeHistory marketGradeHistory = optional.get();
 
-            log.info("{}", marketGradeHistory.getGrade().getGradeType());
-
             //show that external method,because all types of grade utilized it
             BigDecimal totalSale = calculateSalesOfMarket(marketGradeHistory.getMarket().getId(),
                     marketGradeHistory.getStartDate());
 
             Long gradeId = marketGradeHistory.getGrade().getId();
-            log.info("gradeId: {}", gradeId);
 
             Long marketId = marketGradeHistory.getMarket().getId();
-            log.info("marketId: {}", marketId);
 
             //select bonus amount of active positions
             List<GradeRuleResponse> gradeRules = gradeRuleRepository
                     .findByGradeIdAndMarketId(gradeId,
                             marketId);
-            log.info("gradeRuleResponse : {} ", gradeRules);
 
+            List<Long> employeeIds = gradeRules.stream()
+                    .map(GradeRuleResponse::getEmployeeId)
+                    .distinct()
+                    .toList();
+
+            List<EmployerContract> contracts = employerContractRepository
+                    .findAllByEmployerIdInAndIsActive(employeeIds, true);
+
+            Map<Long, EmployerContract> contractMap = contracts.stream()
+                    .collect(Collectors.toMap(c -> c.getEmployer().getId(), Function.identity()));
+
+            //create list for set all employers bonus amount with base salary
+            List<EmployerContractResponse> employerContractResponse = new ArrayList<>();
+
+            List<Long> employerIds = employerContractResponse.stream()
+                    .map(EmployerContractResponse::getEmployerId)
+                    .distinct()
+                    .toList();
+
+            Map<Long, Employer> employerMap = employerRepository.findAllById(employerIds)
+                    .stream()
+                    .collect(Collectors.toMap(Employer::getId, e -> e));
+
+            List<GradeHistory> gradeHistories = new ArrayList<>();
 
             if (marketGradeHistory.getGrade().getGradeType() == GradeType.Fixed) {
-
-                log.info("total sale price of market :{}", totalSale);
 
                 if (totalSale.compareTo(marketGradeHistory.getMinThreshold()) <= 0) {
                     throw new TargetNotReachedException("Market", "min threshold",
                             marketGradeHistory.getMinThreshold());
                 }
 
-
-                List<Long> employeeIds = gradeRules.stream()
-                        .map(GradeRuleResponse::employeeId)
-                        .distinct()
-                        .toList();
-
-                log.info("employeeIds : {}", employeeIds);
-
-                List<EmployerContract> contracts = employerContractRepository
-                        .findAllByEmployerIdInAndIsActive(employeeIds, true);
-
-                Map<Long, EmployerContract> contractMap = contracts.stream()
-                        .collect(Collectors.toMap(c -> c.getEmployer().getId(), Function.identity()));
-
-                //create list for set all employers bonus amount with base salary
-                List<EmployerContractResponse> employerContractResponse = new ArrayList<>();
-
                 for (GradeRuleResponse gradeRuleResponse : gradeRules) {
-                    EmployerContract contract = contractMap.get(gradeRuleResponse.employeeId());
-
-                    log.info("contract: {} ", contract);
+                    EmployerContract contract = contractMap.get(gradeRuleResponse.getEmployeeId());
 
                     if (contract != null) {
                         EmployerContractResponse response = new EmployerContractResponse();
 
-                        response.setGradeId(gradeRuleResponse.gradeId());
+                        response.setGradeId(gradeRuleResponse.getGradeId());
                         response.setPositionId(contract.getPosition().getId());
                         response.setMarketId(contract.getMarket().getId());
                         response.setEmployerId(contract.getEmployer().getId());
                         response.setBaseSalary(contract.getBaseSalary());
-                        response.setBonusAmount(gradeRuleResponse.bonusAmount());
+                        response.setBonusAmount(gradeRuleResponse.getBonusAmount());
                         response.setCurrency(contract.getCurrency());
                         response.setValidFrom(contract.getValidFrom());
                         response.setValidTo(contract.getValidTo());
 
                         BigDecimal baseSalary = Optional.ofNullable(contract.getBaseSalary()).orElse(BigDecimal.ZERO);
-                        BigDecimal bonusAmount = Optional.ofNullable(gradeRuleResponse.bonusAmount()).orElse(BigDecimal.ZERO);
+                        BigDecimal bonusAmount = Optional.ofNullable(gradeRuleResponse.getBonusAmount()).orElse(BigDecimal.ZERO);
                         response.setTotalAmount(baseSalary.add(bonusAmount));
 
                         employerContractResponse.add(response);
@@ -142,18 +139,6 @@ public class GradeServiceImpl implements GradeService {
                 }
 
                 log.info("employerContract response : {}", employerContractResponse);
-
-                List<Long> employerIds = employerContractResponse.stream()
-                        .map(EmployerContractResponse::getEmployerId)
-                        .distinct()
-                        .toList();
-
-                Map<Long, Employer> employerMap = employerRepository.findAllById(employerIds)
-                        .stream()
-                        .collect(Collectors.toMap(Employer::getId, e -> e));
-
-                List<GradeHistory> gradeHistories = new ArrayList<>();
-
 
                 for (EmployerContractResponse response : employerContractResponse) {
                     Employer employer = employerMap.get(response.getEmployerId());
@@ -171,6 +156,139 @@ public class GradeServiceImpl implements GradeService {
                 gradeHistoryRepository.saveAll(gradeHistories);
             }
 
+            if (marketGradeHistory.getGrade().getGradeType() == GradeType.Percent) {
+                if (totalSale.compareTo(marketGradeHistory.getMinThreshold()) <= 0) {
+                    throw new TargetNotReachedException("Market", "threshold", marketGradeHistory.getMinThreshold());
+                }
+                int countOfSpecialEmployer = gradeRules.size();
+
+                int totalCountOfEmployer = employerContractRepository.countByMarketIdAndIsActive(marketId, true);
+
+                int countOfNotSpecialEmployer = totalCountOfEmployer - countOfSpecialEmployer;
+
+                BigDecimal fixAmount = totalSale.multiply(
+                        marketGradeHistory.getGrade().getGeneralPercent().divide(BigDecimal.valueOf(100),
+                                4, RoundingMode.HALF_UP));
+
+                BigDecimal sumOfPercent = BigDecimal.ZERO;
+
+                List<GradeRuleResponse> updatedRules = new ArrayList<>();
+
+                for (GradeRuleResponse rule : gradeRules) {
+                    BigDecimal bonusPercent = rule.getBonusPercent();
+                    sumOfPercent = sumOfPercent.add(bonusPercent);
+                    Long employeeId = rule.getEmployeeId();
+                    // formula: (fixAmount * bonusPercent) / 100
+                    BigDecimal newPriceOfGradeRule = fixAmount.multiply(bonusPercent)
+                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+
+                    updatedRules.add(new GradeRuleResponse(
+                            rule.getGradeId(),
+                            rule.getPositionId(),
+                            employeeId,
+                            rule.getMarketId(),
+                            rule.getBonusPercent(),
+                            newPriceOfGradeRule,
+                            rule.getCurrency()
+                    ));
+                }
+
+                BigDecimal newPercent = BigDecimal.valueOf(100).subtract(sumOfPercent);
+
+                BigDecimal newPriceOfNotSpecialEmployer = fixAmount.multiply(
+                        newPercent.divide(BigDecimal.valueOf(100),
+                                4, RoundingMode.HALF_UP));
+
+                BigDecimal amountPerEmployer = BigDecimal.ZERO;
+
+                if (countOfNotSpecialEmployer > 0) {
+                    amountPerEmployer = newPriceOfNotSpecialEmployer.divide(
+                            BigDecimal.valueOf(countOfNotSpecialEmployer),
+                            2,
+                            RoundingMode.HALF_UP
+                    );
+                }
+//                log.info("amountPerEmployer : {}", amountPerEmployer);
+
+                for (GradeRuleResponse gradeRuleResponse : updatedRules) {
+                    EmployerContract contract = contractMap.get(gradeRuleResponse.getEmployeeId());
+                    if (contract != null) {
+                        EmployerContractResponse response = new EmployerContractResponse();
+
+                        response.setGradeId(gradeRuleResponse.getGradeId());
+                        response.setPositionId(contract.getPosition().getId());
+                        response.setMarketId(contract.getMarket().getId());
+                        response.setEmployerId(contract.getEmployer().getId());
+                        response.setBaseSalary(contract.getBaseSalary());
+                        response.setBonusAmount(gradeRuleResponse.getBonusAmount());
+                        response.setCurrency(contract.getCurrency());
+                        response.setValidFrom(contract.getValidFrom());
+                        response.setValidTo(contract.getValidTo());
+
+                        BigDecimal baseSalary = Optional.ofNullable(contract.getBaseSalary()).orElse(BigDecimal.ZERO);
+                        BigDecimal bonusAmount = Optional.ofNullable(gradeRuleResponse.getBonusAmount()).orElse(BigDecimal.ZERO);
+                        response.setTotalAmount(baseSalary.add(bonusAmount));
+
+                        employerContractResponse.add(response);
+                    }
+                }
+
+                List<EmployerContractResponse> employerContracts = employerContractRepository
+                        .findByEmployerIdNotIn(employeeIds, marketId, true);
+
+                log.info("employerContracts (grade ruleda olmayan istifadeciler gelmelidir) : {}", employerContracts);
+
+
+                List<EmployerContractResponse> notSpecificEmployer = new ArrayList<>();
+
+                for (EmployerContractResponse employerContractResponse1 : employerContracts) {
+                    EmployerContractResponse response = new EmployerContractResponse();
+
+                    response.setGradeId(employerContractResponse1.getGradeId());
+                    response.setPositionId(employerContractResponse1.getPositionId());
+                    response.setMarketId(employerContractResponse1.getMarketId());
+                    response.setEmployerId(employerContractResponse1.getEmployerId());
+                    response.setBaseSalary(employerContractResponse1.getBaseSalary());
+
+                    log.info("amountPerEmployer before set: {}", amountPerEmployer);
+
+                    response.setBonusAmount(amountPerEmployer);
+
+                    log.info("bonusAmount after set: {}", response.getBonusAmount());
+
+                    response.setCurrency(employerContractResponse1.getCurrency());
+                    response.setValidFrom(employerContractResponse1.getValidFrom());
+                    response.setValidTo(employerContractResponse1.getValidTo());
+
+                    response.setTotalAmount(amountPerEmployer.add(employerContractResponse1.getBaseSalary()));
+
+                    notSpecificEmployer.add(response);
+                }
+                log.info("SON HAL -> employerContracts (grade ruleda olmayan istifadeciler gelmelidir) : {}",
+                        notSpecificEmployer);
+
+                log.info("employerContractResponse (adi isci olmayanlar hansiki grade ruleda qeyd edilenler) : {}",
+                        employerContractResponse);
+
+                employerContractResponse.addAll(notSpecificEmployer);
+
+                log.info("butun list : {}", employerContractResponse);
+
+                for (EmployerContractResponse response : employerContractResponse) {
+                    Employer employer = employerMap.get(response.getEmployerId());
+
+                    GradeHistory gradeHistory = new GradeHistory();
+                    gradeHistory.setEmployer(employer);
+                    gradeHistory.setBaseSalary(response.getBaseSalary());
+                    gradeHistory.setBonusAmount(response.getBonusAmount());
+                    gradeHistory.setTotalSalary(response.getTotalAmount());
+                    gradeHistory.setPaidAt(LocalDateTime.now());
+                    gradeHistory.setPeriod("MONTHLY");
+
+                    gradeHistories.add(gradeHistory);
+                }
+                gradeHistoryRepository.saveAll(gradeHistories);
+            }
         }
         watch.stop();
         log.info("Calculate Grade method execution time: {} ms", watch.getTotalTimeMillis());
@@ -181,5 +299,4 @@ public class GradeServiceImpl implements GradeService {
         return saleRepository.sumPriceByMarketIdAndDate(marketId,
                 startDate);
     }
-//    public
 }

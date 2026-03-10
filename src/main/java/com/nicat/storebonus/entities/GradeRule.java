@@ -36,7 +36,7 @@ public class GradeRule extends BaseEntity {
     @JoinColumn(name = "employee_id")
     Employer employer;
 
-    Double bonusPercent;
+    BigDecimal bonusPercent;
     BigDecimal amount;
     String currency;
 }

@@ -4,6 +4,7 @@ package com.nicat.storebonus.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.builder.ToStringExclude;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,14 +23,15 @@ public class MarketGradeHistory extends BaseEntity {
     LocalDate endDate;
     BigDecimal minThreshold;
     BigDecimal maxThreshold;
-    BigDecimal generalPercent;
 
     //grade_id
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grade_id")
     Grade grade;
 
     //market_id
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "market_id")
     Market market;
