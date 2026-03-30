@@ -28,21 +28,26 @@ public class GradeRuleServiceImpl implements GradeRuleService {
     MarketService marketService;
 
     @Override
-    public void create(GradeRuleRequest gradeRuleRequest) {
-        Grade grade = gradeService.checkExistsGrade(gradeRuleRequest.gradeId());
+    public void create(GradeRuleRequest request) {
+        log.info("Process started for Market ID: {}, Position ID: {}, Grade ID: {}",
+                request.marketId(), request.positionId(), request.gradeId());
+        Grade grade = gradeService.checkExistsGrade(request.gradeId());
+        log.debug("Grade validated: {}", grade.getName());
 
-        Position position = positionService.checkExistsPosition(gradeRuleRequest.positionId());
+        Position position = positionService.checkExistsPosition(request.positionId());
+        log.debug("Position validated: {}", position.getName());
 
-        Market market = marketService.checkExistsMarket(gradeRuleRequest.marketId());
+        Market market = marketService.checkExistsMarket(request.marketId());
+        log.debug("Market validated: {}", market.getName());
 
         GradeRule gradeRule = GradeRule.builder()
-                .bonusPercent(gradeRuleRequest.bonusPercent())
-                .amount(gradeRuleRequest.amount())
+                .bonusPercent(request.bonusPercent())
+                .amount(request.amount())
                 .market(market)
                 .position(position)
                 .grade(grade)
                 .build();
-
         gradeRuleRepository.save(gradeRule);
+        log.info("New rule created and saved");
     }
 }

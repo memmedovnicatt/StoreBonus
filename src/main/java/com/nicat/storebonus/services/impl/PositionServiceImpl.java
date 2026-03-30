@@ -31,8 +31,10 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public void create(PositionRequest positionRequest) {
+        log.info("Create was started for Position with name: {}", positionRequest.name());
         boolean checkPositionName = positionRepository.existsByName(positionRequest.name());
         if (checkPositionName) {
+            log.warn("Position name:{} was already exists", positionRequest.name());
             throw new ResourceAlreadyExistsException(positionRequest.name());
         }
 
@@ -41,10 +43,12 @@ public class PositionServiceImpl implements PositionService {
                 .build();
 
         positionRepository.save(position);
+        log.info("Position created and saved");
     }
 
     @Override
     public List<PositionResponse> findAll() {
+        log.info("Request to retrieve all active positions started.");
         List<Position> positions = positionRepository.findAllByIsActiveTrue();
         return positionMapper.toListPositionResponse(positions);
     }

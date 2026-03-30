@@ -26,7 +26,9 @@ public class WareHouseServiceImpl implements WareHouseService {
 
     @Override
     public void create(WareHouseRequest wareHouseRequest) {
+        log.info("Create was started for WareHouse");
         Company company = companyService.checkCompanyExists(wareHouseRequest.companyId());
+        log.debug("Company validated:{}", company.getId());
 
         WareHouse wareHouse = WareHouse.builder()
                 .location(wareHouseRequest.location())
@@ -35,6 +37,7 @@ public class WareHouseServiceImpl implements WareHouseService {
                 .build();
 
         wareHouseRepository.save(wareHouse);
+        log.info("WareHouse created and saved successfully");
     }
 
     @Override
@@ -42,6 +45,7 @@ public class WareHouseServiceImpl implements WareHouseService {
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
                 .orElse(null);
         if (wareHouse == null) {
+            log.info("WareHouse was not found with ID:{}", wareHouseId);
             throw new ResourceNotFoundException("WareHouse", "id", wareHouseId);
         }
         return wareHouse;

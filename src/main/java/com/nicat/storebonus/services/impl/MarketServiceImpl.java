@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.yaml.snakeyaml.events.Event;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,10 +38,12 @@ public class MarketServiceImpl implements MarketService {
     MarketGradeHistoryRepository marketGradeHistoryRepository;
 
 
-    //transactional
+    //    @Transactional
     @Override
     public void create(MarketRequest marketRequest) {
+        log.info("Create starting for Market");
         WareHouse wareHouse = wareHouseService.checkExistsWareHouse(marketRequest.wareHouseId());
+        log.debug("WareHouse validated: {}", wareHouse.getName());
 
         Grade grade = null;
         if (marketRequest.gradeId() != null) {
@@ -48,14 +52,15 @@ public class MarketServiceImpl implements MarketService {
 
         BigDecimal middleThreshold = calculateMiddleThreshold(marketRequest.minThreshold(),
                 marketRequest.maxThreshold());
+        log.info("Calculate middle threshold for min and max value of threshold:{}", middleThreshold);
 
-        log.info("middleThreshold : {}", middleThreshold);
         Market market = Market.builder()
                 .wareHouse(wareHouse)
                 .name(marketRequest.name())
                 .location(marketRequest.location())
                 .build();
         marketRepository.save(market);
+        log.info("Market was created and saved");
 
         MarketGradeHistory marketGradeHistory = MarketGradeHistory.builder()
                 .market(market)
@@ -65,7 +70,7 @@ public class MarketServiceImpl implements MarketService {
                 .maxThreshold(marketRequest.maxThreshold())
                 .build();
         marketGradeHistoryRepository.save(marketGradeHistory);
-
+        log.info("MarketGradeHistory was created and saved");
     }
 
     @Override
@@ -81,13 +86,16 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public void delete(Long id) {
+        log.info("Delete was started with Market ID:{}", id);
         Market market = marketRepository.findById(id).orElse(null);
         if (market == null) {
+            log.warn("Market was not found with ID:{}", id);
             throw new ResourceNotFoundException("Market", "id", id);
         }
         market.setActive(false);
         market.setDeletedAt(LocalDateTime.now());
         marketRepository.save(market);
+        log.info("Market was saved");
     }
 
     public BigDecimal calculateMiddleThreshold(BigDecimal a, BigDecimal b) {

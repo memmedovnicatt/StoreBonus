@@ -27,35 +27,53 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void create(CompanyRequest companyRequest) {
+        log.info("Starting to create a new company with name: {} and location: {}",
+                companyRequest.name(), companyRequest.location());
+
         Company company = Company.builder()
                 .location(companyRequest.location())
                 .name(companyRequest.name())
                 .build();
-
+        log.info("Company successfully created with ID: {}", company.getId());
         companyRepository.save(company);
+        log.debug("Company successfully saved");
     }
 
     @Override
     public Company checkCompanyExists(Long companyId) {
+        log.info("Checking existence of company with ID: {}", companyId);
         Company company = companyRepository.findById(companyId).orElse(null);
         if (company == null) {
+            log.warn("Company not found with ID: {}", companyId);
             throw new ResourceNotFoundException("Company", "id", companyId);
         }
+        log.info("Company found: {} (ID: {})", company.getName(), companyId);
         return company;
     }
 
     @Override
     public void delete(Long id) {
+        log.info("Request received to deactivate company with ID: {}", id);
         Company company = companyRepository.findById(id).orElse(null);
         if (company == null) {
+            log.warn("Company with ID: {} is already inactive. Skipping update.", id);
             throw new ResourceNotFoundException("Company", "id", id);
         }
         company.setActive(false);
         companyRepository.save(company);
+        log.info("Company '{}' (ID: {}) has been successfully deactivated.",
+                company.getName(), id);
     }
 
     @Override
     public List<Company> getAll() {
-        return companyRepository.findAllByIsActiveTrue();
+        log.info("Request to retrieve all active companies started.");
+        List<Company> activeCompanies = companyRepository.findAllByIsActiveTrue();
+        if (activeCompanies.isEmpty()) {
+            log.warn("No active companies found in the database.");
+        } else {
+            log.info("Successfully retrieved {} active companies.", activeCompanies.size());
+        }
+        return activeCompanies;
     }
 }

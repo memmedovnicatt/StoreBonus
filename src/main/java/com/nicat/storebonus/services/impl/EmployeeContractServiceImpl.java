@@ -30,38 +30,47 @@ public class EmployeeContractServiceImpl implements EmployeeContractService {
     EmployeeContractMapper employeeContractMapper;
 
     @Override
-    public void createContract(EmployeeContractRequest employeeContractRequest) {
-        log.debug("createContract method was started for employee contract service");
+    public void createContract(EmployeeContractRequest request) {
+        log.info("[Contract Creation] Started for Employee ID: {} at Market ID: {}",
+                request.employerId(), request.marketId());
 
         Market market = marketService
-                .checkExistsMarket(employeeContractRequest.marketId());
-        log.debug("marketId: {}", market.getId());
+                .checkExistsMarket(request.marketId());
+        log.debug("Market validated: {} (ID: {})", market.getName(), market.getId());
 
         Employee employee = employeeService
-                .checkExistsEmployer(employeeContractRequest.employerId());
-        log.debug("employeeId: {}", employee.getId());
+                .checkExistsEmployer(request.employerId());
+        log.debug("Employee validated: {} {} (ID: {})",
+                employee.getName(), employee.getSurname(), employee.getId());
 
         EmployeeContract savedEmployeeContract = employeeContractMapper
-                .toEmployeeContract(employeeContractRequest);
+                .toEmployeeContract(request);
+        log.debug("EmployeeContractRequest mapped to EmployeeContract");
 
         savedEmployeeContract.setEmployee(employee);
         savedEmployeeContract.setPosition(employee.getPosition());
         savedEmployeeContract.setMarket(market);
 
         employeeContractRepository.save(savedEmployeeContract);
-        log.debug("save successfully for employee contract");
+        log.debug("EmployeeContract saved with successfully");
     }
 
     @Override
     public void deactivateEmployee(Long employeeId) {
-        log.debug("deactivateEmployee method was started");
-        EmployeeContract employeeContract = employeeContractRepository.findByEmployeeIdAndIsActive(employeeId, true)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", employeeId));
-        log.debug("employeeContract : {}", employeeContract.getEmployee().getId());
+        log.info("Request started for Employee ID: {}", employeeId);
+        EmployeeContract employeeContract = employeeContractRepository
+                .findByEmployeeIdAndIsActive(employeeId, true)
+                .orElseThrow(() -> {
+                    log.warn("[Employee Deactivation Failed] No active contract found for Employee ID: {}", employeeId);
+                    return new ResourceNotFoundException("Employee", "id", employeeId);
+                });
+
+        log.debug("[Employee Deactivation] Found active contract (ID: {}) for Employee: {}",
+                employeeContract.getId(), employeeContract.getEmployee().getName());
+
         employeeContract.setActive(false);
         employeeContract.setLeavingDate(LocalDate.now());
-        log.debug("employee status changed");
         employeeContractRepository.save(employeeContract);
-        log.debug("employeeContract was saved");
+        log.debug("Status set to INACTIVE and Leaving Date set to {}", LocalDate.now());
     }
 }

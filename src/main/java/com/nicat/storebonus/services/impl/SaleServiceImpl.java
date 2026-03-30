@@ -43,15 +43,19 @@ public class SaleServiceImpl implements SaleService {
 
     @Override
     public void create(SaleRequest saleRequest) {
+        log.info("Created was started for Sale");
         Market market = marketService.checkExistsMarket(saleRequest.marketId());
+        log.debug("Market validated:{}", market.getId());
 
         Employee employee = employeeService.checkExistsEmployer(saleRequest.employeeId());
+        log.debug("Employee validated:{}", employee.getId());
 
         Sale savedSale = saleMapper.toSale(saleRequest);
         savedSale.setEmployee(employee);
         savedSale.setMarket(market);
 
         saleRepository.save(savedSale);
+        log.debug("Sale was saved");
     }
 
     @Override

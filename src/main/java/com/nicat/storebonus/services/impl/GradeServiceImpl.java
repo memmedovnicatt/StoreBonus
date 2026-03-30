@@ -47,6 +47,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public void create(GradeRequest gradeRequest) {
+        log.info("Starting to create a new Grade");
         Grade grade = Grade.builder()
                 .gradeType(gradeRequest.gradeType())
                 .name(gradeRequest.name())
@@ -55,6 +56,7 @@ public class GradeServiceImpl implements GradeService {
                 .maxPercent(gradeRequest.maxPercent())
                 .build();
         gradeRepository.save(grade);
+        log.info("New grade created and saved");
     }
 
     @Override
@@ -350,13 +352,16 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public void update(Long id, GradeRequest gradeRequest) {
+        log.info("Update was started for Grade with ID;{}", id);
         Grade grade = gradeRepository.findById(id).orElse(null);
         if (grade == null) {
+            log.warn("Grade was not found with ID:{}", id);
             throw new ResourceNotFoundException("Grade", "id", id);
         }
 
         gradeMapper.updateEntityForFields(gradeRequest, grade);
         grade.setUpdatedAt(LocalDateTime.now());
         gradeRepository.save(grade);
+        log.info("Grade was saved");
     }
 }

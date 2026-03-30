@@ -25,13 +25,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void create(EmployeeRequest employeeRequest) {
+        log.info("Starting to create a new Employee");
         Position position = positionService
                 .checkExistsPosition(employeeRequest.positionId());
+        log.info("Checking existence of position with ID: {}", position.getId());
 
         Employee savedEmployee = employeeMapper.toEmployer(employeeRequest);
         savedEmployee.setPosition(position);
-
         employeeRepository.save(savedEmployee);
+        log.info("Employee was saved successfully");
     }
 
     @Override
