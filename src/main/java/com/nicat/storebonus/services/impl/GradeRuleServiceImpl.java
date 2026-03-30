@@ -1,10 +1,9 @@
 package com.nicat.storebonus.services.impl;
 
 import com.nicat.storebonus.dtos.request.GradeRuleRequest;
-import com.nicat.storebonus.entities.Grade;
-import com.nicat.storebonus.entities.GradeRule;
-import com.nicat.storebonus.entities.Market;
-import com.nicat.storebonus.entities.Position;
+import com.nicat.storebonus.entities.*;
+import com.nicat.storebonus.exceptions.handler.ResourceNotFoundException;
+import com.nicat.storebonus.repositories.EmployeeRepository;
 import com.nicat.storebonus.repositories.GradeRuleRepository;
 import com.nicat.storebonus.services.GradeRuleService;
 import com.nicat.storebonus.services.GradeService;
@@ -26,6 +25,7 @@ public class GradeRuleServiceImpl implements GradeRuleService {
     GradeService gradeService;
     PositionService positionService;
     MarketService marketService;
+    EmployeeRepository employeeRepository;
 
     @Override
     public void create(GradeRuleRequest request) {
@@ -40,12 +40,19 @@ public class GradeRuleServiceImpl implements GradeRuleService {
         Market market = marketService.checkExistsMarket(request.marketId());
         log.debug("Market validated: {}", market.getName());
 
+        Employee employee = employeeRepository.findById(request.employeeId()).orElse(null);
+        if (employee == null) {
+            throw new ResourceNotFoundException("Employee", "id", request.employeeId());
+        }
+
         GradeRule gradeRule = GradeRule.builder()
                 .bonusPercent(request.bonusPercent())
                 .amount(request.amount())
                 .market(market)
                 .position(position)
                 .grade(grade)
+                .employee(employee)
+                .currency("AZN")
                 .build();
         gradeRuleRepository.save(gradeRule);
         log.info("New rule created and saved");
