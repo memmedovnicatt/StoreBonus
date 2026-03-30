@@ -12,10 +12,10 @@ import java.util.List;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface GradeHistoryMapper {
 
-    @Mapping(source = "employer.name", target = "employerName")
-    @Mapping(source = "employer.surname", target = "employerSurname")
-    @Mapping(source = "employer.phoneNumber", target = "phoneNumber")
-    @Mapping(source = "employer.position.name", target = "positionName")
+    @Mapping(source = "employee.name", target = "employeeName")
+    @Mapping(source = "employee.surname", target = "employeeSurname")
+    @Mapping(source = "employee.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "employee.position.name", target = "positionName")
     @Mapping(source = "market.name", target = "marketName")
     MarketGradeHistoryResponse toGradeHistory(GradeHistory gradeHistory);
 

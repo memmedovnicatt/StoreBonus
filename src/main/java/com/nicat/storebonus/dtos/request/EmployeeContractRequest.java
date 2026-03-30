@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public record EmployerContractRequest(
+public record EmployeeContractRequest(
         @JsonFormat(pattern = "yyyy-MM-dd")
         Date validFrom,
 

@@ -5,6 +5,8 @@ import com.nicat.storebonus.dtos.response.ApiResponse;
 import com.nicat.storebonus.dtos.response.PositionResponse;
 import com.nicat.storebonus.dtos.response.ResponseMessage;
 import com.nicat.storebonus.services.PositionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +20,11 @@ import java.util.List;
 @RequestMapping("/positions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Tag(name = "Position APIs")
 public class PositionController {
     PositionService positionService;
 
+    @Operation(summary = "Create a new position")
     @PostMapping()
     public ResponseEntity<ApiResponse<Void>> createPosition(@Valid @RequestBody PositionRequest positionRequest) {
         positionService.create(positionRequest);
@@ -29,6 +33,7 @@ public class PositionController {
         );
     }
 
+    @Operation(summary = "Get all positions")
     @GetMapping()
     public ResponseEntity<ApiResponse<List<PositionResponse>>> getAll() {
         List<PositionResponse> responseList = positionService.findAll();
@@ -37,4 +42,11 @@ public class PositionController {
         );
     }
 
+    @Operation(summary = "Delete a position by ID")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deletePosition(@PathVariable Long id) {
+        positionService.delete(id);
+        return ResponseEntity.ok
+                (ApiResponse.success(null, ResponseMessage.SUCCESS_DELETE));
+    }
 }

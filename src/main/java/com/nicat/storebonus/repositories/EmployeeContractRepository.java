@@ -1,27 +1,25 @@
 package com.nicat.storebonus.repositories;
 
-import com.nicat.storebonus.dtos.response.EmployerContractResponse;
-import com.nicat.storebonus.entities.EmployerContract;
-import org.springframework.data.jpa.repository.EntityGraph;
+import com.nicat.storebonus.dtos.response.EmployeeContractResponse;
+import com.nicat.storebonus.entities.EmployeeContract;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
-public interface EmployerContractRepository extends JpaRepository<EmployerContract, Long> {
-    List<EmployerContract> findAllByEmployerIdInAndIsActive(List<Long> employeeIds, boolean isActive);
+public interface EmployeeContractRepository extends JpaRepository<EmployeeContract, Long> {
+    List<EmployeeContract> findAllByEmployeeIdInAndIsActive(List<Long> employeeIds, boolean isActive);
 
     int countByMarketIdAndIsActive(Long marketId, boolean isActive);
 
     @Query("""
-            SELECT new com.nicat.storebonus.dtos.response.EmployerContractResponse(
+            SELECT new com.nicat.storebonus.dtos.response.EmployeeContractResponse(
                 null,
                 e.position.id,
                 e.market.id,
-                e.employer.id,
+                e.employee.id,
                 e.baseSalary,
                 null,
                 null,
@@ -29,22 +27,22 @@ public interface EmployerContractRepository extends JpaRepository<EmployerContra
                 e.validFrom,
                 e.validTo
             )
-            FROM EmployerContract e
-            WHERE e.employer.id NOT IN :employerIds
+            FROM EmployeeContract e
+            WHERE e.employee.id NOT IN :employerIds
             AND e.market.id=:marketId
             AND e.isActive=true
             """)
-    List<EmployerContractResponse> findByEmployerIdNotIn(@Param("employerIds") List<Long> employerIds,
+    List<EmployeeContractResponse> findByEmployeeIdNotIn(@Param("employeeIds") List<Long> employeeIds,
                                                          Long marketId,
                                                          boolean isActive);
 
 
     @Query("""
-            SELECT new com.nicat.storebonus.dtos.response.EmployerContractResponse(
+            SELECT new com.nicat.storebonus.dtos.response.EmployeeContractResponse(
                 null,
                 e.position.id,
                 e.market.id,
-                e.employer.id,
+                e.employee.id,
                 e.baseSalary,
                 null,
                 null,
@@ -52,13 +50,13 @@ public interface EmployerContractRepository extends JpaRepository<EmployerContra
                 e.validFrom,
                 e.validTo
             )
-            FROM EmployerContract e
+            FROM EmployeeContract e
             WHERE e.market.id=:marketId
             AND e.isActive=true
             """)
-    List<EmployerContractResponse> findAllByMarketIdAndIsActive(Long marketId,boolean isActive);
+    List<EmployeeContractResponse> findAllByMarketIdAndIsActive(Long marketId, boolean isActive);
 
-    Optional<EmployerContract> findByEmployerIdAndIsActive(Long employeeId, boolean isActive);
+    Optional<EmployeeContract> findByEmployeeIdAndIsActive(Long employeeId, boolean isActive);
 
-    List<EmployerContract> findByLeavingDateIsNotNull();
+    List<EmployeeContract> findByLeavingDateIsNotNull();
 }

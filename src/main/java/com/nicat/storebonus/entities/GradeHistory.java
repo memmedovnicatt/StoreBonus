@@ -7,7 +7,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.yaml.snakeyaml.error.Mark;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,8 +23,8 @@ public class GradeHistory extends BaseEntity {
 
     //employee_id
     @ManyToOne
-    @JoinColumn(name = "employer_id")
-    Employer employer;
+    @JoinColumn(name = "employee_id")
+    Employee employee;
 
     //market_id
     @ManyToOne

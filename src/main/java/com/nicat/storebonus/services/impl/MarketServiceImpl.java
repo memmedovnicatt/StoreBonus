@@ -1,8 +1,6 @@
 package com.nicat.storebonus.services.impl;
 
 import com.nicat.storebonus.dtos.request.MarketRequest;
-import com.nicat.storebonus.dtos.response.ApiResponse;
-import com.nicat.storebonus.dtos.response.ResponseMessage;
 import com.nicat.storebonus.entities.Grade;
 import com.nicat.storebonus.entities.Market;
 import com.nicat.storebonus.entities.MarketGradeHistory;
@@ -23,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -73,6 +72,22 @@ public class MarketServiceImpl implements MarketService {
     public Market checkExistsMarket(Long marketId) {
         return marketRepository.findById(marketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Market", "id", marketId));
+    }
+
+    @Override
+    public List<Market> getAll() {
+        return marketRepository.findAllByIsActiveTrue();
+    }
+
+    @Override
+    public void delete(Long id) {
+        Market market = marketRepository.findById(id).orElse(null);
+        if (market == null) {
+            throw new ResourceNotFoundException("Market", "id", id);
+        }
+        market.setActive(false);
+        market.setDeletedAt(LocalDateTime.now());
+        marketRepository.save(market);
     }
 
     public BigDecimal calculateMiddleThreshold(BigDecimal a, BigDecimal b) {

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -41,5 +42,20 @@ public class CompanyServiceImpl implements CompanyService {
             throw new ResourceNotFoundException("Company", "id", companyId);
         }
         return company;
+    }
+
+    @Override
+    public void delete(Long id) {
+        Company company = companyRepository.findById(id).orElse(null);
+        if (company == null) {
+            throw new ResourceNotFoundException("Company", "id", id);
+        }
+        company.setActive(false);
+        companyRepository.save(company);
+    }
+
+    @Override
+    public List<Company> getAll() {
+        return companyRepository.findAllByIsActiveTrue();
     }
 }

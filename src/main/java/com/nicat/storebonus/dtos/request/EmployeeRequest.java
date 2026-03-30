@@ -1,12 +1,11 @@
 package com.nicat.storebonus.dtos.request;
 
 import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record EmployerRequest(
+public record EmployeeRequest(
         @NotNull
         String name,
 

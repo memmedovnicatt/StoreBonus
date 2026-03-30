@@ -1,6 +1,8 @@
 package com.nicat.storebonus.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +26,7 @@ public class WareHouse extends BaseEntity {
     String location;
     LocalDateTime deletedAt;
 
+    @JsonIgnore // when we fetched all warehouses in this time related company entity won't fetched
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     Company company;

@@ -11,11 +11,11 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 @NoArgsConstructor
-public class EmployerContractResponse {
+public class EmployeeContractResponse {
     Long gradeId;
     Long positionId;
     Long marketId;
-    Long employerId;
+    Long employeeId;
     BigDecimal baseSalary;
     BigDecimal bonusAmount;
     BigDecimal totalAmount;

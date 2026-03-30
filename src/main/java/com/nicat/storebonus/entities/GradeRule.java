@@ -34,7 +34,7 @@ public class GradeRule extends BaseEntity {
     //employee_id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
-    Employer employer;
+    Employee employee;
 
     BigDecimal bonusPercent;
     BigDecimal amount;

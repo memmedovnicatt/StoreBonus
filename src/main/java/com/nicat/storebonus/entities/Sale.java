@@ -4,14 +4,9 @@ package com.nicat.storebonus.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -24,8 +19,8 @@ import java.util.Date;
 public class Sale extends BaseEntity {
     //employer_id
     @ManyToOne
-    @JoinColumn(name = "employer_id")
-    Employer employer;
+    @JoinColumn(name = "employee_id")
+    Employee employee;
 
     //market_id
     @ManyToOne

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record MarketGradeHistoryResponse(
-        String employerName,
-        String employerSurname,
+        String employeeName,
+        String employeeSurname,
         String marketName,
         BigDecimal baseSalary,
         BigDecimal bonusAmount,

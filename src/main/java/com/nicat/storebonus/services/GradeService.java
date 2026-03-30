@@ -18,4 +18,6 @@ public interface GradeService {
     void calculateGrade(@Valid GradeCalculationRequest gradeCalculationRequest);
 
     List<MarketGradeHistoryResponse> getAll();
+
+    void update(Long id, GradeRequest gradeRequest);
 }

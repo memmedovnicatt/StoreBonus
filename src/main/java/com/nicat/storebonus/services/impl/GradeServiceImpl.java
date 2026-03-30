@@ -2,13 +2,14 @@ package com.nicat.storebonus.services.impl;
 
 import com.nicat.storebonus.dtos.request.GradeCalculationRequest;
 import com.nicat.storebonus.dtos.request.GradeRequest;
-import com.nicat.storebonus.dtos.response.EmployerContractResponse;
+import com.nicat.storebonus.dtos.response.EmployeeContractResponse;
 import com.nicat.storebonus.dtos.response.MarketGradeHistoryResponse;
 import com.nicat.storebonus.dtos.response.GradeRuleResponse;
 import com.nicat.storebonus.entities.*;
 import com.nicat.storebonus.exceptions.handler.ResourceNotFoundException;
 import com.nicat.storebonus.exceptions.handler.TargetNotReachedException;
 import com.nicat.storebonus.mapper.GradeHistoryMapper;
+import com.nicat.storebonus.mapper.GradeMapper;
 import com.nicat.storebonus.repositories.*;
 import com.nicat.storebonus.services.GradeService;
 import lombok.AccessLevel;
@@ -37,11 +38,12 @@ public class GradeServiceImpl implements GradeService {
     SaleRepository saleRepository;
     MarketGradeHistoryRepository marketGradeHistoryRepository;
     GradeRuleRepository gradeRuleRepository;
-    EmployerContractRepository employerContractRepository;
-    EmployerRepository employerRepository;
+    EmployeeContractRepository employeeContractRepository;
+    EmployeeRepository employeeRepository;
     GradeHistoryRepository gradeHistoryRepository;
     GradeHistoryMapper gradeHistoryMapper;
-    private final MarketRepository marketRepository;
+    MarketRepository marketRepository;
+    GradeMapper gradeMapper;
 
     @Override
     public void create(GradeRequest gradeRequest) {
@@ -115,26 +117,26 @@ public class GradeServiceImpl implements GradeService {
 
         List<Long> employeeIds = collectEmployeeIds(rules);
 
-        int totalStaff = employerContractRepository
+        int totalStaff = employeeContractRepository
                 .countByMarketIdAndIsActive(marketGradeHistory.getMarket().getId(), true);
 
         BigDecimal fixAmount = totalSale.multiply(
                 marketGradeHistory.getGrade().getGeneralPercent().divide(BigDecimal.valueOf(100),
                         4, RoundingMode.HALF_UP));
 
-        List<EmployerContractResponse> specialResponses = calculateSpecialPercentBonus(rules, fixAmount, getContractMap(employeeIds));
+        List<EmployeeContractResponse> specialResponses = calculateSpecialPercentBonus(rules, fixAmount, getContractMap(employeeIds));
 
         BigDecimal distributedPercent = rules.stream()
                 .map(GradeRuleResponse::getBonusPercent)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<EmployerContractResponse> nonSpecialResponses =
+        List<EmployeeContractResponse> nonSpecialResponses =
                 calculateNonSpecialPercentBonus(marketGradeHistory, fixAmount, distributedPercent, employeeIds, totalStaff);
 
-        List<EmployerContractResponse> allResponses = new ArrayList<>(specialResponses);
+        List<EmployeeContractResponse> allResponses = new ArrayList<>(specialResponses);
         allResponses.addAll(nonSpecialResponses);
 
-        saveGradeHistories(allResponses, getEmployerMap(allResponses.stream().map(EmployerContractResponse::getEmployerId).toList()), marketGradeHistory.getMarket().getId());
+        saveGradeHistories(allResponses, getEmployerMap(allResponses.stream().map(EmployeeContractResponse::getEmployeeId).toList()), marketGradeHistory.getMarket().getId());
     }
 
     private void processGradeType(MarketGradeHistory marketGradeHistory, BigDecimal totalSale) {
@@ -147,14 +149,14 @@ public class GradeServiceImpl implements GradeService {
     }
 
 
-    private List<EmployerContractResponse> calculateSpecialPercentBonus(List<GradeRuleResponse> rules, BigDecimal pool, Map<Long, EmployerContract> contractMap) {
+    private List<EmployeeContractResponse> calculateSpecialPercentBonus(List<GradeRuleResponse> rules, BigDecimal pool, Map<Long, EmployeeContract> contractMap) {
         return rules.stream().map(rule -> {
             BigDecimal individualBonus = pool.multiply(rule.getBonusPercent()).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
             return mapToResponse(contractMap.get(rule.getEmployeeId()), individualBonus, rule.getGradeId());
         }).toList();
     }
 
-    private List<EmployerContractResponse> calculateNonSpecialPercentBonus(MarketGradeHistory history, BigDecimal pool, BigDecimal usedPercent, List<Long> excludedIds, int totalStaff) {
+    private List<EmployeeContractResponse> calculateNonSpecialPercentBonus(MarketGradeHistory history, BigDecimal pool, BigDecimal usedPercent, List<Long> excludedIds, int totalStaff) {
         int remainingCount = totalStaff - excludedIds.size();
         if (remainingCount <= 0) return Collections.emptyList();
 
@@ -162,7 +164,7 @@ public class GradeServiceImpl implements GradeService {
         BigDecimal remainingPool = pool.multiply(remainingPercent.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
         BigDecimal amountPerPerson = remainingPool.divide(BigDecimal.valueOf(remainingCount), 2, RoundingMode.HALF_UP);
 
-        return employerContractRepository.findByEmployerIdNotIn(excludedIds, history.getMarket().getId(), true)
+        return employeeContractRepository.findByEmployeeIdNotIn(excludedIds, history.getMarket().getId(), true)
                 .stream()
                 .peek(res -> {
                     res.setBonusAmount(amountPerPerson);
@@ -182,44 +184,44 @@ public class GradeServiceImpl implements GradeService {
         List<Long> employeeIds = collectEmployeeIds(rules);
 
         //getEmployees together ID
-        Map<Long, Employer> employerMap = getEmployerMap(employeeIds);
+        Map<Long, Employee> employerMap = getEmployerMap(employeeIds);
 
         //getContracts of employees which belong to rules
-        Map<Long, EmployerContract> contractMap = getContractMap(employeeIds);
+        Map<Long, EmployeeContract> contractMap = getContractMap(employeeIds);
 
-        List<EmployerContractResponse> employerContractResponses = rules.stream()
+        List<EmployeeContractResponse> employeeContractRespons = rules.stream()
                 .map(rule -> mapToResponse(contractMap.get(rule.getEmployeeId()), rule.getBonusAmount(), rule.getGradeId()))
                 .toList();
 
-        log.debug("EmployerContractResponses : {}", employerContractResponses);
+        log.debug("EmployeeContractResponses : {}", employeeContractRespons);
 
         //extract method,because all methods used this.
-        saveGradeHistories(employerContractResponses, employerMap, marketGradeHistory.getMarket().getId());
+        saveGradeHistories(employeeContractRespons, employerMap, marketGradeHistory.getMarket().getId());
 
         log.debug("Grades was successfully saved in GradeHistory");
     }
 
-    private Map<Long, Employer> getEmployerMap(List<Long> ids) {
-        Map<Long, Employer> employerMap = employerRepository.findAllById(ids).stream()
-                .collect(Collectors.toMap(Employer::getId, e -> e));
-        log.debug("EmployerMap : {}", employerMap);
+    private Map<Long, Employee> getEmployerMap(List<Long> ids) {
+        Map<Long, Employee> employerMap = employeeRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(Employee::getId, e -> e));
+        log.debug("EmployeeMap : {}", employerMap);
         return employerMap;
     }
 
 
-    private Map<Long, EmployerContract> getContractMap(List<Long> ids) {
-        Map<Long, EmployerContract> employerContractMap = employerContractRepository
-                .findAllByEmployerIdInAndIsActive(ids, true).stream()
-                .collect(Collectors.toMap(c -> c.getEmployer().getId(), Function.identity()));
+    private Map<Long, EmployeeContract> getContractMap(List<Long> ids) {
+        Map<Long, EmployeeContract> employerContractMap = employeeContractRepository
+                .findAllByEmployeeIdInAndIsActive(ids, true).stream()
+                .collect(Collectors.toMap(c -> c.getEmployee().getId(), Function.identity()));
         log.debug("EmployerContract : {}", employerContractMap);
         return employerContractMap;
     }
 
     private void handleThresholdGrade(MarketGradeHistory marketGradeHistory, BigDecimal totalSale) {
         log.info("handleThresholdGrade method was started");
-        List<EmployerContractResponse> employerContractResponses = new ArrayList<>();
+        List<EmployeeContractResponse> employeeContractRespons = new ArrayList<>();
 
-        int totalCountOfEmployer = employerContractRepository
+        int totalCountOfEmployer = employeeContractRepository
                 .countByMarketIdAndIsActive(marketGradeHistory.getMarket().getId(), true);
 
         //calculate middle threshold
@@ -242,39 +244,39 @@ public class GradeServiceImpl implements GradeService {
                 RoundingMode.HALF_UP
         );
 
-        List<EmployerContractResponse> employerContracts = employerContractRepository
+        List<EmployeeContractResponse> employerContracts = employeeContractRepository
                 .findAllByMarketIdAndIsActive(marketGradeHistory.getMarket().getId(), true);
 
         //todo:maybe change to stream api format line 163-182,but my opinion this format more readable
-        for (EmployerContractResponse updateContractResponse : employerContracts) {
+        for (EmployeeContractResponse updateContractResponse : employerContracts) {
             BigDecimal baseSalary = Optional.ofNullable(updateContractResponse.getBaseSalary()).orElse(BigDecimal.ZERO);
 
             updateContractResponse.setBonusAmount(bonusAmountPerEmployee);
 
             updateContractResponse.setTotalAmount(baseSalary.add(bonusAmountPerEmployee));
 
-            employerContractResponses.add(updateContractResponse);
+            employeeContractRespons.add(updateContractResponse);
         }
 
-        List<Long> employeeIds = employerContractResponses.stream()
-                .map(EmployerContractResponse::getEmployerId)
+        List<Long> employeeIds = employeeContractRespons.stream()
+                .map(EmployeeContractResponse::getEmployeeId)
                 .distinct()
                 .toList();
 
-        Map<Long, Employer> employerMap = employerRepository.findAllById(employeeIds)
+        Map<Long, Employee> employerMap = employeeRepository.findAllById(employeeIds)
                 .stream()
-                .collect(Collectors.toMap(Employer::getId, e -> e));
+                .collect(Collectors.toMap(Employee::getId, e -> e));
 
-        saveGradeHistories(employerContractResponses, employerMap, marketGradeHistory.getMarket().getId());
+        saveGradeHistories(employeeContractRespons, employerMap, marketGradeHistory.getMarket().getId());
     }
 
-    public EmployerContractResponse mapToResponse(EmployerContract contract, BigDecimal bonus, Long gradeId) {
+    public EmployeeContractResponse mapToResponse(EmployeeContract contract, BigDecimal bonus, Long gradeId) {
         BigDecimal baseSalary = Optional.ofNullable(contract.getBaseSalary())
                 .orElse(BigDecimal.ZERO);
-        return EmployerContractResponse.builder()
+        return EmployeeContractResponse.builder()
                 .totalAmount(baseSalary.add(bonus))
                 .baseSalary(baseSalary)
-                .employerId(contract.getEmployer().getId())
+                .employeeId(contract.getEmployee().getId())
                 .gradeId(gradeId)
                 .positionId(contract.getPosition().getId())
                 .marketId(contract.getMarket().getId())
@@ -315,11 +317,11 @@ public class GradeServiceImpl implements GradeService {
                 startDate);
     }
 
-    private void saveGradeHistories(List<EmployerContractResponse> responses, Map<Long, Employer> employerMap, Long marketId) {
+    private void saveGradeHistories(List<EmployeeContractResponse> responses, Map<Long, Employee> employerMap, Long marketId) {
         Market currentMarket = marketRepository.getReferenceById(marketId);
         List<GradeHistory> histories = responses.stream().map(res -> {
             GradeHistory history = new GradeHistory();
-            history.setEmployer(employerMap.get(res.getEmployerId()));
+            history.setEmployee(employerMap.get(res.getEmployeeId()));
             history.setBaseSalary(res.getBaseSalary());
             history.setBonusAmount(res.getBonusAmount());
             history.setMarket(currentMarket);
@@ -344,5 +346,17 @@ public class GradeServiceImpl implements GradeService {
         log.debug("gradeHistories :{} ", gradeHistories.size());
 
         return gradeHistoryMapper.toListGradeHistory(gradeHistories);
+    }
+
+    @Override
+    public void update(Long id, GradeRequest gradeRequest) {
+        Grade grade = gradeRepository.findById(id).orElse(null);
+        if (grade == null) {
+            throw new ResourceNotFoundException("Grade", "id", id);
+        }
+
+        gradeMapper.updateEntityForFields(gradeRequest, grade);
+        grade.setUpdatedAt(LocalDateTime.now());
+        gradeRepository.save(grade);
     }
 }

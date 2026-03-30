@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "employer_contracts")
-public class EmployerContract extends BaseEntity {
+@Table(name = "employee_contracts")
+public class EmployeeContract extends BaseEntity {
     LocalDate validFrom;
 
     LocalDate validTo;
@@ -26,8 +26,8 @@ public class EmployerContract extends BaseEntity {
 
     //employer_id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employer_id")
-    Employer employer;
+    @JoinColumn(name = "employee_id")
+    Employee employee;
 
     //market_id
     @ToString.Exclude

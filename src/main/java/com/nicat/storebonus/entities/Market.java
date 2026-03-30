@@ -1,6 +1,7 @@
 package com.nicat.storebonus.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +29,7 @@ public class Market extends BaseEntity {
     LocalDateTime deletedAt;
 
     //warehouse_id
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ware_house_id")
     WareHouse wareHouse;

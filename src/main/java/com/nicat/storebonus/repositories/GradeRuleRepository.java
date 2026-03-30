@@ -12,7 +12,7 @@ public interface GradeRuleRepository extends JpaRepository<GradeRule, Long> {
     @Query("select new com.nicat.storebonus.dtos.response.GradeRuleResponse(" +
             "gbr.grade.id," +
             "gbr.position.id," +
-            "gbr.employer.id," +
+            "gbr.employee.id," +
             "gbr.market.id," +
             "gbr.bonusPercent," +
             "gbr.amount," +

@@ -45,14 +45,24 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public List<PositionResponse> findAll() {
-        List<Position> positions = positionRepository.findAll();
+        List<Position> positions = positionRepository.findAllByIsActiveTrue();
         return positionMapper.toListPositionResponse(positions);
     }
 
     @Override
     public Position checkExistsPosition(Long positionId) {
-        log.info("BASLADI");
         return positionRepository.findById(positionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Position", "id", positionId));
+    }
+
+    @Override
+    public void delete(Long id) {
+        Position position = positionRepository.findById(id).orElse(null);
+        if (position == null) {
+            throw new ResourceNotFoundException("Position", "id", id);
+        }
+        position.setActive(false);
+        position.setDeletedAt(LocalDateTime.now());
+        positionRepository.save(position);
     }
 }

@@ -9,6 +9,8 @@ public enum ResponseMessage {
     SUCCESS_FETCH(1000, "Data fetched successfully"),
     SUCCESS_CREATE(1001, "Data created successfully"),
     SUCCESS_CALCULATED(1002, "Grade successfully calculated"),
+    SUCCESS_DELETE(1003, "Data successfully deleted"),
+    SUCCESS_UPDATE(1004, "Data successfully updated"),
 
 
     // Error codes (example, between the 2000-3000)

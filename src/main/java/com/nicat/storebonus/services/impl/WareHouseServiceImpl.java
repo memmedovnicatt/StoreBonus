@@ -1,8 +1,6 @@
 package com.nicat.storebonus.services.impl;
 
 import com.nicat.storebonus.dtos.request.WareHouseRequest;
-import com.nicat.storebonus.dtos.response.ApiResponse;
-import com.nicat.storebonus.dtos.response.ResponseMessage;
 import com.nicat.storebonus.entities.Company;
 import com.nicat.storebonus.entities.WareHouse;
 import com.nicat.storebonus.exceptions.handler.ResourceNotFoundException;
@@ -13,9 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.apache.bcel.generic.RET;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +45,10 @@ public class WareHouseServiceImpl implements WareHouseService {
             throw new ResourceNotFoundException("WareHouse", "id", wareHouseId);
         }
         return wareHouse;
+    }
+
+    @Override
+    public List<WareHouse> getAll() {
+        return wareHouseRepository.findAll();
     }
 }

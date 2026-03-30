@@ -6,9 +6,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface CompanyService {
     void create(@Valid CompanyRequest companyRequest);
 
     Company checkCompanyExists(Long companyId);
+
+    void delete(Long id);
+
+    List<Company> getAll();
 }
